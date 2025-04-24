@@ -8,6 +8,10 @@ from .serializers import (CommentSerializer, FollowSerializer, GroupSerializer,
 from posts.models import Follow, Group, Post
 
 
+class PermissionViewset(viewsets.ModelViewSet):
+    permission_classes = (IsAuthorOrReadOnly,)
+
+
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
@@ -25,6 +29,12 @@ class CommentViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         post = get_object_or_404(Post, pk=self.kwargs.get('post_id'))
         return post.comments.all()
+    
+    def get_post_obj(self):
+        return get_object_or_404(
+            Post,
+            pk=self.kwargs.get('post_pk')
+        )
 
     def perform_create(self, serializer):
         post = get_object_or_404(Post, pk=self.kwargs.get('post_id'))
